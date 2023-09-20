@@ -1,0 +1,41 @@
+# Gerekli kütüphaneleri içe aktarın
+import RPi.GPIO as GPIO
+import time
+
+# GPIO pin tanımlamaları
+light_pin = 17  # Aydınlatma kontrolü için GPIO pin
+heater_pin = 18  # Isıtma kontrolü için GPIO pin
+security_pin = 27  # Güvenlik kontrolü için GPIO pin
+
+# GPIO pinlerini çıkış olarak ayarlayın
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(light_pin, GPIO.OUT)
+GPIO.setup(heater_pin, GPIO.OUT)
+GPIO.setup(security_pin, GPIO.IN)
+
+# Ana döngü
+try:
+    while True:
+        # Güvenlik sensörünün durumunu okuyun
+        if GPIO.input(security_pin):
+            print("Hareket Algılandı! Güvenlik uyarısı.")
+            # Güvenlik uyarısı işlemi burada yapılabilir, örneğin bir bildirim gönderme
+        else:
+            print("Güvenlik bölgesi güvende.")
+
+        # Kullanıcıdan gelen komutları işleyin
+        user_command = input("Komutu girin (Aydınlatma: 'on' veya 'off', Isıtma: 'heat' veya 'cool'): ")
+        if user_command.lower() == 'on':
+            GPIO.output(light_pin, GPIO.HIGH)
+        elif user_command.lower() == 'off':
+            GPIO.output(light_pin, GPIO.LOW)
+        elif user_command.lower() == 'heat':
+            GPIO.output(heater_pin, GPIO.HIGH)
+        elif user_command.lower() == 'cool':
+            GPIO.output(heater_pin, GPIO.LOW)
+        else:
+            print("Geçersiz komut. Lütfen 'on', 'off', 'heat' veya 'cool' girin.")
+
+except KeyboardInterrupt:
+    # Ctrl+C ile programı kapatın
+    GPIO.cleanup()
