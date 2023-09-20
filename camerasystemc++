@@ -1,0 +1,70 @@
+ belirli bir şablon görüntüyü kullanarak bu görüntüdeki nesneleri tespit etmeye çalışır ve tespit edilen nesneleri yeşil bir dikdörtgenle çerçevelemeye çalışır. Ayrıca, tespit edilen nesneleri bir video dosyasına kaydede
+   r.
+
+   #include <opencv2/opencv.hpp>
+
+int main() {
+    // Kamera cihazını açın (örneğin, /dev/video0)
+    cv::VideoCapture cap(0);
+
+    if (!cap.isOpened()) {
+        std::cerr << "Kamera açılamadı." << std::endl;
+        return -1;
+    }
+
+    // Nesne tanıma için örnek bir şablon görüntü yükleyin
+    cv::Mat templateImage = cv::imread("template.png");
+
+    if (templateImage.empty()) {
+        std::cerr << "Şablon görüntü yüklenemedi." << std::endl;
+        return -1;
+    }
+
+    // Nesne tespiti için bir eşleştirme algoritması tanımlayın
+    int matchMethod = cv::TM_CCOEFF_NORMED;
+
+    cv::Mat frame;
+    cap >> frame;
+    cv::Size frameSize = frame.size();
+
+    cv::VideoWriter video("output.avi", cv::VideoWriter::fourcc('M','J','P','G'), 30, frameSize);
+
+    while (1) {
+        // Kameradan bir kare yakala
+        cap >> frame;
+
+        // Şablon eşleştirmeyi uygula
+        cv::Mat result;
+        cv::matchTemplate(frame, templateImage, result, matchMethod);
+
+        // Eşleşen yerleri bulun
+        double minVal, maxVal;
+        cv::Point minLoc, maxLoc;
+        cv::minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
+
+        // Eşleşme eşiği ayarlayın (threshold)
+        double threshold = 0.8;
+        if (maxVal >= threshold) {
+            // Eşleşen nesneyi çerçevele
+            cv::Rect roi(maxLoc, cv::Size(templateImage.cols, templateImage.rows));
+            cv::rectangle(frame, roi, cv::Scalar(0, 255, 0), 2);
+        }
+
+        // Sonucu görüntüleme
+        cv::imshow("Hedef Tespiti", frame);
+
+        // Sonucu videoya kaydetme
+        video.write(frame);
+
+        // Eğer çıkış tuşu (örneğin, 'q') basılırsa döngüyü sonlandır
+        if (cv::waitKey(1) == 'q') {
+            break;
+        }
+    }
+
+    // Video ve kamera bağlantısını kapatın
+    video.release();
+    cap.release();
+
+    return 0;
+}
