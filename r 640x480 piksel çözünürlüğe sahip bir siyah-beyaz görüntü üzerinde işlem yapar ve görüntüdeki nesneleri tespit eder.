@@ -1,0 +1,74 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity ImageProcessing is
+    Port ( clk : in STD_LOGIC;
+           rst : in STD_LOGIC;
+           hsync, vsync : in STD_LOGIC;
+           pixel_in : in STD_LOGIC_VECTOR(7 downto 0);
+           object_detected : out STD_LOGIC;
+           x_position : out STD_LOGIC_VECTOR(9 downto 0);
+           y_position : out STD_LOGIC_VECTOR(9 downto 0);
+           object_width : out STD_LOGIC_VECTOR(9 downto 0);
+           object_height : out STD_LOGIC_VECTOR(9 downto 0));
+end ImageProcessing;
+
+architecture Behavioral of ImageProcessing is
+    -- Görüntü işleme parametreleri
+    constant IMAGE_WIDTH : integer := 640;
+    constant IMAGE_HEIGHT : integer := 480;
+    constant THRESHOLD : STD_LOGIC_VECTOR(7 downto 0) := "10010000"; -- Eşik değeri
+    
+    -- Görüntü işleme sinyalleri
+    signal grayscale_pixel : STD_LOGIC_VECTOR(7 downto 0);
+    signal object_detected_signal : STD_LOGIC := '0';
+    signal x_position_signal : STD_LOGIC_VECTOR(9 downto 0) := (others => '0');
+    signal y_position_signal : STD_LOGIC_VECTOR(9 downto 0) := (others => '0');
+    signal object_width_signal : STD_LOGIC_VECTOR(9 downto 0) := (others => '0');
+    signal object_height_signal : STD_LOGIC_VECTOR(9 downto 0) := (others => '0');
+    
+begin
+    process (clk, rst)
+    begin
+        if rst = '1' then
+            -- Sıfırlama işlemi
+            object_detected_signal <= '0';
+            x_position_signal <= (others => '0');
+            y_position_signal <= (others => '0');
+            object_width_signal <= (others => '0');
+            object_height_signal <= (others => '0');
+        elsif rising_edge(clk) then
+            -- Görüntü işleme algoritması burada uygulanır
+            -- Algoritma, nesne tespiti ve konumunu hesaplar
+            -- Nesne tespit edildiğinde, object_detected_signal '1' olur
+            -- Nesnenin konumu ve boyutu diğer sinyallerde saklanır
+            
+            -- Grayscale dönüşümü
+            grayscale_pixel <= (0.299 * to_integer(unsigned(pixel_in)(7 downto 0))) +
+                               (0.587 * to_integer(unsigned(pixel_in)(15 downto 8))) +
+                               (0.114 * to_integer(unsigned(pixel_in)(23 downto 16)));
+            
+            -- Nesne tespiti ve konum hesaplama algoritması burada gelir
+            -- Örnek: Yüz tespiti
+            
+            -- Nesne tespit edildiğinde sinyalleri ayarla
+            if grayscale_pixel > THRESHOLD then
+                object_detected_signal <= '1';
+                x_position_signal <= to_stdlogicvector(integer'high - 1);
+                y_position_signal <= to_stdlogicvector(integer'high - 1);
+                object_width_signal <= to_stdlogicvector(integer'high - 1);
+                object_height_signal <= to_stdlogicvector(integer'high - 1);
+            else
+                object_detected_signal <= '0';
+            end if;
+        end if;
+    end process;
+    
+    object_detected <= object_detected_signal;
+    x_position <= x_position_signal;
+    y_position <= y_position_signal;
+    object_width <= object_width_signal;
+    object_height <= object_height_signal;
+end Behavioral;
