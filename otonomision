@@ -1,0 +1,66 @@
+Bu Python kodu, bir otonom aracı simüle eder. Raspberry Pi üzerindeki motorları kontrol eder ve önündeki engellere göre hareketini ayarlar. Ayrıca, bir ultrasonik mesafe sensörü kullanarak çevresel mesafeyi ölçer ve bu veriye göre hareket eder.
+
+import RPi.GPIO as GPIO
+import time
+from gpiozero import Robot
+
+# Motorlar için GPIO pin tanımlamaları
+left_motor_forward_pin = 17
+left_motor_backward_pin = 18
+right_motor_forward_pin = 22
+right_motor_backward_pin = 23
+
+# Uzaklık sensörü için GPIO pin tanımlamaları
+trigger_pin = 24
+echo_pin = 25
+
+# Motorlar için GPIO ayarları
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(left_motor_forward_pin, GPIO.OUT)
+GPIO.setup(left_motor_backward_pin, GPIO.OUT)
+GPIO.setup(right_motor_forward_pin, GPIO.OUT)
+GPIO.setup(right_motor_backward_pin, GPIO.OUT)
+
+# Robot nesnesi oluşturun
+robot = Robot(left=(left_motor_forward_pin, left_motor_backward_pin), right=(right_motor_forward_pin, right_motor_backward_pin))
+
+# Uzaklık sensörü için GPIO ayarları
+GPIO.setup(trigger_pin, GPIO.OUT)
+GPIO.setup(echo_pin, GPIO.IN)
+
+# Mesafe ölçümü yapmak için fonksiyon
+def measure_distance():
+    GPIO.output(trigger_pin, True)
+    time.sleep(0.00001)
+    GPIO.output(trigger_pin, False)
+
+    pulse_start = time.time()
+    pulse_end = time.time()
+
+    while GPIO.input(echo_pin) == 0:
+        pulse_start = time.time()
+
+    while GPIO.input(echo_pin) == 1:
+        pulse_end = time.time()
+
+    pulse_duration = pulse_end - pulse_start
+    distance = pulse_duration * 17150  # Sesin hızı (34300 cm/s) ile çarpılır
+    return round(distance, 2)
+
+# Ana döngü
+try:
+    while True:
+        # Mesafe ölçümü yapın
+        distance = measure_distance()
+        print(f"Mesafe: {distance} cm")
+
+        # Mesafe kontrolü yaparak robotun hareketini belirleyin
+        if distance > 20:
+            robot.forward()
+        else:
+            robot.stop()
+
+except KeyboardInterrupt:
+    # Ctrl+C ile programı kapatın
+    robot.stop()
+    GPIO.cleanup()
