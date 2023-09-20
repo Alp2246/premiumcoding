@@ -1,0 +1,63 @@
+#include <Adafruit_ILI9341.h>
+#include <Adafruit_GFX.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_MCP23017.h>
+#include <Adafruit_FRAM_I2C.h>
+
+// TFT ekran için tanımlamalar
+#define TFT_CLK 13
+#define TFT_MISO 12
+#define TFT_MOSI 11
+#define TFT_CS 10
+#define TFT_DC 9
+#define TFT_RST 8
+
+// MCP23017 I/O genişletici için tanımlamalar
+Adafruit_MCP23017 mcp;
+
+// FRAM bellek için tanımlamalar
+Adafruit_FRAM_I2C fram = Adafruit_FRAM_I2C();
+
+// Butonlar için tanımlamalar
+#define BUTTON_A 0
+#define BUTTON_B 1
+#define BUTTON_C 2
+
+void setup() {
+  // TFT ekranı başlat
+  Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST, TFT_CLK, TFT_RST, TFT_MISO);
+
+  // MCP23017 I/O genişleticiyi başlat
+  mcp.begin(0);
+  mcp.pinMode(BUTTON_A, INPUT_PULLUP);
+  mcp.pinMode(BUTTON_B, INPUT_PULLUP);
+  mcp.pinMode(BUTTON_C, INPUT_PULLUP);
+
+  // FRAM belleği başlat
+  fram.begin();
+
+  // Diğer başlangıç ayarları burada yapılabilir
+}
+
+void loop() {
+  // Buton durumlarını oku
+  bool buttonAState = !mcp.digitalRead(BUTTON_A);
+  bool buttonBState = !mcp.digitalRead(BUTTON_B);
+  bool buttonCState = !mcp.digitalRead(BUTTON_C);
+
+  // Butonlara göre oyun konsolu simülasyonu yapılabilir
+  if (buttonAState) {
+    // A butonuna basıldığında yapılacak işlem
+  }
+
+  if (buttonBState) {
+    // B butonuna basıldığında yapılacak işlem
+  }
+
+  if (buttonCState) {
+    // C butonuna basıldığında yapılacak işlem
+  }
+
+  // Diğer oyun mantığı ve işlemleri burada devam edebilir
+}
